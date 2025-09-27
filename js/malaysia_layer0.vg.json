@@ -1,11 +1,11 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "width": 800,
+  "width": 1000,
   "height": 300,
-  "title": "Population of Malaysia by State (2025)",
+  "title": "Population Density (people/km²) of Malaysia by State (2025)",
   "projection": {"type": "mercator"},
   "data": {
-    "url": "data/gadm41_MYS_1.topojson",
+    "url": "../data/gadm41_MYS_1.topojson",
     "format": {"type": "topojson", "feature": "gadm41_MYS_1"}
   },
   "transform": [
@@ -13,27 +13,29 @@
       "lookup": "properties.NAME_1",
       "from": {
         "data": {
-          "url": "data/population_state_simple.csv"
+          "url": "../data/population_state_pop_dens.csv"
         },
         "key": "state",
-        "fields": ["population"]
+        "fields": ["pop_dens", "population", "area_size"]
       }
     }
   ],
-  "mark": {"type": "geoshape"},
+  "mark": {"type": "geoshape", "stroke": "grey"},
   "encoding": {
     "color": {
-      "title": "Population ('000)",
-      "field": "population",
+      "title": "People per km²",
+      "field": "pop_dens",
       "type": "quantitative",
       "scale": {
-        "type": "linear",
+        "type": "log",
         "scheme": {"name": "lighttealblue"}
       }
     },
     "tooltip": [
       {"field": "properties.NAME_1", "type": "nominal", "title": "State"},
-      {"field": "population", "type": "quantitative", "title": "Population ('000)"}
+      {"field": "pop_dens", "type": "quantitative", "title": "People per km²", "format": ",d"},
+      {"field": "population", "type": "quantitative", "title": "Population", "format": ",d"},
+      {"field": "area_size", "type": "quantitative", "title": "Area Size (km²)", "format": ",d"}
     ]
   }
 }
