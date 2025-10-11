@@ -1,0 +1,58 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": 1000,
+  "height": 300,
+  "title": "Population Density (people/km²) of Malaysia by State (2025)",
+  "projection": {"type": "mercator"},
+  "data": {
+    "url": "../data/gadm41_MYS_1.topojson",
+    "format": {"type": "topojson", "feature": "gadm41_MYS_1"}
+  },
+  "transform": [
+    {
+      "lookup": "properties.NAME_1",
+      "from": {
+        "data": {
+          "url": "../data/population_state_01.csv",
+          "format": {"type": "csv"},
+          "transform": [
+            {"filter": "datum.year == 2025"},
+            {"filter": "datum.ethnicity == 'overall'"}
+          ]
+        },
+        "key": "state",
+        "fields": ["age", "population", "ethnicity", "year"]
+      }
+    },
+    {
+      "lookup": "properties.NAME_1",
+      "from": {
+        "data": {
+          "url": "../data/state_area_size.csv",
+          "format": {"type": "csv"}
+        },
+        "key": "state",
+        "fields": ["area_size"]
+      }
+    },
+    {"calculate": "toNumber(datum.population) / toNumber(datum.area_size)", "as": "pop_dens"}
+  ],
+  "mark": {"type": "geoshape", "stroke": "grey"},
+  "encoding": {
+    "color": {
+      "title": "People per km²",
+      "field": "pop_dens",
+      "type": "quantitative",
+      "scale": {
+        "type": "log",
+        "scheme": {"name": "lighttealblue"}
+      }
+    },
+    "tooltip": [
+      {"field": "properties.NAME_1", "type": "nominal", "title": "State"},
+      {"field": "pop_dens", "type": "quantitative", "title": "People per km²", "format": ",d"},
+      {"field": "population", "type": "quantitative", "title": "Population", "format": ",d"},
+      {"field": "area_size", "type": "quantitative", "title": "Area Size (km²)", "format": ",d"}
+    ]
+  }
+}
