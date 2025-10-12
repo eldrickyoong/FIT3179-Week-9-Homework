@@ -1,0 +1,64 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Year-over-Year % Change in Malaysian Population by State",
+  "width": 700,
+  "height": 500,
+  "params": [
+    { 
+      "name": "stateSel", 
+      "select": { "type": "point", "fields": ["state"] }, 
+      "bind": "legend" 
+    },
+    {"name": "Johor", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "Kedah", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "Kelantan", "value": true, "bind": {"input": "checkbox"}},
+    {"name": "Melaka", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "NegeriSembilan", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "Pahang", "value": true, "bind": {"input": "checkbox"}},
+    {"name": "Perak", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "Perlis", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "PulauPinang", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "Sabah", "value": true, "bind": {"input": "checkbox"}},
+    {"name": "Sarawak", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "Selangor", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "Terengganu", "value": true, "bind": {"input": "checkbox"}},
+    {"name": "KualaLumpur", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "Putrajaya", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "Labuan", "value": true, "bind": {"input": "checkbox"}}
+  ],
+  "data": { "url": "https://raw.githubusercontent.com/eldrickyoong/FIT3179-Homework-Vegalite/refs/heads/main/data/population_state_01.csv" },
+  "transform": [
+    {"filter": "(datum.state === 'Johor' && Johor) || (datum.state === 'Kedah' && Kedah) || (datum.state === 'Kelantan' && Kelantan) || (datum.state === 'Melaka' && Melaka) || (datum.state === 'NegeriSembilan' && NegeriSembilan) || (datum.state === 'Pahang' && Pahang) || (datum.state === 'Perak' && Perak) || (datum.state === 'Perlis' && Perlis) || (datum.state === 'PulauPinang' && PulauPinang) || (datum.state === 'Sabah' && Sabah) || (datum.state === 'Sarawak' && Sarawak) || (datum.state === 'Selangor' && Selangor) || (datum.state === 'Terengganu' && Terengganu) || (datum.state === 'KualaLumpur' && KualaLumpur) || (datum.state === 'Labuan' && Labuan) || (datum.state === 'Putrajaya' && Putrajaya)"},
+    {"filter": "datum.ethnicity == 'overall'"},
+    {"filter": "datum.age == 'overall'"},
+    {"filter": "datum.sex == 'both'"},
+    {"filter": "isValid(datum.population) && isValid(datum.year)"},
+    {
+      "window": [{ "op": "lag", "field": "population", "as": "prev_pop" }],
+      "groupby": ["state"],
+      "sort": [{ "field": "year", "order": "ascending" }]
+    },
+    {
+      "calculate": "isValid(datum.prev_pop) ? (datum.population - datum.prev_pop) / datum.prev_pop : null",
+      "as": "yoy_pct"
+    }
+  ],
+  "mark": { "type": "line", "point": true },
+  "encoding": {
+    "opacity": { "condition": { "param": "stateSel", "value": 1 }, "value": 0.05 },
+    "x": { "field": "year", "type": "temporal", "title": "Year" },
+    "y": {
+      "field": "yoy_pct",
+      "type": "quantitative",
+      "title": "YoY Change",
+      "axis": { "format": "%" }
+    },
+    "color": { "field": "state", "type": "nominal", "title": "State", "scale": {"scheme": "category20c"}},
+    "tooltip": [
+      { "field": "state", "type": "nominal" },
+      { "field": "year", "type": "temporal" },
+      { "field": "population", "type": "quantitative", "title": "Population" },
+      { "field": "yoy_pct", "type": "quantitative", "title": "YoY %", "format": ".1%" }
+    ]
+  }
+}

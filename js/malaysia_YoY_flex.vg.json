@@ -1,0 +1,80 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Malaysia — Year-over-Year Change in Population by State",
+  "width": 900,
+  "height": 500,
+
+  "params": [
+    {
+      "name": "metric",
+      "value": "pct",
+      "bind": {
+        "input": "select",
+        "options": ["pct", "abs"],
+        "labels": ["% change", "Absolute change"]
+      }
+    },
+    {
+      "name": "stateSel",
+      "select": {"type": "point", "fields": ["state"]},
+      "bind": "legend"
+    }
+  ],
+
+  "data": { "url": "https://raw.githubusercontent.com/eldrickyoong/FIT3179-Homework-Vegalite/refs/heads/main/data/population_state_01.csv" },
+
+  "transform": [
+    {"filter": "datum.ethnicity == 'overall'"},
+    {"filter": "datum.age == 'overall'"},
+    {"filter": "datum.sex == 'both'"},
+    { "filter": "isValid(datum.population) && isValid(datum.year)" },
+    {
+      "window": [{ "op": "lag", "field": "population", "as": "prev_pop" }],
+      "groupby": ["state"],
+      "sort": [{"field": "year", "order": "ascending"}]
+    },
+    {
+      "calculate": "isValid(datum.prev_pop) ? (datum.population - datum.prev_pop) / datum.prev_pop : null",
+      "as": "yoy_pct"
+    },
+    {
+      "calculate": "isValid(datum.prev_pop) ? datum.population - datum.prev_pop : null",
+      "as": "yoy_abs"
+    },
+    {
+      "calculate": "metric == 'pct' ? 100 * datum.yoy_pct : datum.yoy_abs",
+      "as": "yval"
+    }
+  ],
+
+  "mark": {"type": "line", "point": true},
+
+  "encoding": {
+    "x": { "field": "year", "type": "temporal", "title": "Year" },
+    "y": {
+      "field": "yval",
+      "type": "quantitative",
+      "title": {"text": {"expr": "metric=='pct' ? 'YoY Change (%)' : 'YoY Change (people)'"} }
+    },
+    "color": { "field": "state", "type": "nominal", "title": "State" },
+    "opacity": {
+      "condition": { "param": "stateSel", "value": 1 },
+      "value": 0.2
+    },
+    "tooltip": [
+      {"field": "state", "type": "nominal"},
+      {"field": "year", "type": "temporal", "title": "Year"},
+      {"field": "population", "type": "quantitative", "title": "Population"},
+      {
+        "title": "YoY %", "type": "quantitative",
+        "condition": {"test": "metric=='pct'", "field": "yoy_pct", "format": ".1%"},
+        "value": null
+      },
+      {
+        "title": "YoY Δ (people)", "type": "quantitative",
+        "condition": {"test": "metric=='abs'", "field": "yoy_abs", "format": ","},
+        "value": null
+      }
+    ]
+  }
+}

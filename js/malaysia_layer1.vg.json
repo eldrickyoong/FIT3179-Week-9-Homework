@@ -1,55 +1,74 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "width": 1000,
+  "width": 750,
   "height": 300,
-  "title": "Population Density (people/km²) of Malaysia by State (2025)",
+  "params": [
+      {
+        "name": "Year_selection",
+        "value": 2025,
+        "bind": {
+            "input": "range",
+            "min": 1970,
+            "max": 2025,
+            "step": 1,
+            "name": "Year:  "
+        }
+    }
+  ],
+  "title": "Population Density (people/km²) of Malaysia by State (1970-2025)",
   "projection": {"type": "mercator"},
   "data": {
-    "url": "../data/gadm41_MYS_1.topojson",
-    "format": {"type": "topojson", "feature": "gadm41_MYS_1"}
+    "url": "https://raw.githubusercontent.com/eldrickyoong/FIT3179-Homework-Vegalite/refs/heads/main/data/population_state_01.csv",
+    "format": {"type": "csv"}
   },
   "transform": [
     {
-      "lookup": "properties.NAME_1",
+      "lookup": "state",
       "from": {
         "data": {
-          "url": "../data/population_state_01.csv",
-          "format": {"type": "csv"},
-          "transform": [
-            {"filter": "datum.year == 2025"},
-            {"filter": "datum.ethnicity == 'overall'"}
-          ]
+          "url": "https://raw.githubusercontent.com/eldrickyoong/FIT3179-Homework-Vegalite/refs/heads/main/data/gadm41_MYS_1.topojson",
+          "format": {
+            "type": "topojson", 
+            "feature": "gadm41_MYS_1"
+            }
         },
-        "key": "state",
-        "fields": ["age", "population", "ethnicity", "year"]
-      }
+        "key": "properties.NAME_1"
+      },
+      "as": "geo"
+      
     },
     {
-      "lookup": "properties.NAME_1",
+      "lookup": "state",
       "from": {
         "data": {
-          "url": "../data/state_area_size.csv",
+          "url": "https://raw.githubusercontent.com/eldrickyoong/FIT3179-Homework-Vegalite/refs/heads/main/data/state_area_size.csv",
           "format": {"type": "csv"}
         },
         "key": "state",
         "fields": ["area_size"]
       }
     },
+    {"filter": "datum.ethnicity == 'overall'"},
+    {"filter": "datum.year == Year_selection"},
+    {"filter": "datum.age == 'overall'"},
+    {"filter": "datum.sex == 'both'"},
     {"calculate": "toNumber(datum.population) / toNumber(datum.area_size)", "as": "pop_dens"}
   ],
   "mark": {"type": "geoshape", "stroke": "grey"},
   "encoding": {
+    "shape": {"field": "geo", "type": "geojson"},
     "color": {
       "title": "People per km²",
       "field": "pop_dens",
       "type": "quantitative",
       "scale": {
         "type": "log",
-        "scheme": {"name": "lighttealblue"}
+        "scheme": {"name": "oranges"}
       }
     },
     "tooltip": [
-      {"field": "properties.NAME_1", "type": "nominal", "title": "State"},
+      {"field": "state", "type": "nominal", "title": "State"},
+      {"field": "year", "type": "quantitative", "title": "Year"},
       {"field": "pop_dens", "type": "quantitative", "title": "People per km²", "format": ",d"},
       {"field": "population", "type": "quantitative", "title": "Population", "format": ",d"},
       {"field": "area_size", "type": "quantitative", "title": "Area Size (km²)", "format": ",d"}
