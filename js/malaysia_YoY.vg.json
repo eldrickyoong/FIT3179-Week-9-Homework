@@ -3,30 +3,28 @@
   "title": "Year-over-Year % Change in Malaysian Population by State",
   "width": 700,
   "height": 500,
+
   "params": [
-    { 
-      "name": "stateSel", 
-      "select": { "type": "point", "fields": ["state"] }, 
-      "bind": "legend" 
-    },
     {"name": "Johor", "value": true,  "bind": {"input": "checkbox"}},
     {"name": "Kedah", "value": true,  "bind": {"input": "checkbox"}},
     {"name": "Kelantan", "value": true, "bind": {"input": "checkbox"}},
     {"name": "Melaka", "value": true,  "bind": {"input": "checkbox"}},
-    {"name": "NegeriSembilan", "value": true,  "bind": {"input": "checkbox"}},
-    {"name": "Pahang", "value": true, "bind": {"input": "checkbox"}},
-    {"name": "Perak", "value": true,  "bind": {"input": "checkbox"}},
-    {"name": "Perlis", "value": true,  "bind": {"input": "checkbox"}},
-    {"name": "PulauPinang", "value": true,  "bind": {"input": "checkbox"}},
-    {"name": "Sabah", "value": true, "bind": {"input": "checkbox"}},
-    {"name": "Sarawak", "value": true,  "bind": {"input": "checkbox"}},
-    {"name": "Selangor", "value": true,  "bind": {"input": "checkbox"}},
+    {"name": "NegeriSembilan", "value": false,  "bind": {"input": "checkbox"}},
+    {"name": "Pahang", "value": false, "bind": {"input": "checkbox"}},
+    {"name": "Perak", "value": false,  "bind": {"input": "checkbox"}},
+    {"name": "Perlis", "value": false,  "bind": {"input": "checkbox"}},
+    {"name": "PulauPinang", "value": false,  "bind": {"input": "checkbox"}},
+    {"name": "Sabah", "value": false, "bind": {"input": "checkbox"}},
+    {"name": "Sarawak", "value": false,  "bind": {"input": "checkbox"}},
+    {"name": "Selangor", "value": false,  "bind": {"input": "checkbox"}},
     {"name": "Terengganu", "value": true, "bind": {"input": "checkbox"}},
     {"name": "KualaLumpur", "value": true,  "bind": {"input": "checkbox"}},
     {"name": "Putrajaya", "value": true,  "bind": {"input": "checkbox"}},
     {"name": "Labuan", "value": true, "bind": {"input": "checkbox"}}
   ],
+
   "data": { "url": "https://raw.githubusercontent.com/eldrickyoong/FIT3179-Homework-Vegalite/refs/heads/main/data/population_state_01.csv" },
+
   "transform": [
     {"filter": "(datum.state === 'Johor' && Johor) || (datum.state === 'Kedah' && Kedah) || (datum.state === 'Kelantan' && Kelantan) || (datum.state === 'Melaka' && Melaka) || (datum.state === 'NegeriSembilan' && NegeriSembilan) || (datum.state === 'Pahang' && Pahang) || (datum.state === 'Perak' && Perak) || (datum.state === 'Perlis' && Perlis) || (datum.state === 'PulauPinang' && PulauPinang) || (datum.state === 'Sabah' && Sabah) || (datum.state === 'Sarawak' && Sarawak) || (datum.state === 'Selangor' && Selangor) || (datum.state === 'Terengganu' && Terengganu) || (datum.state === 'KualaLumpur' && KualaLumpur) || (datum.state === 'Labuan' && Labuan) || (datum.state === 'Putrajaya' && Putrajaya)"},
     {"filter": "datum.ethnicity == 'overall'"},
@@ -43,22 +41,65 @@
       "as": "yoy_pct"
     }
   ],
-  "mark": { "type": "line", "point": true },
-  "encoding": {
-    "opacity": { "condition": { "param": "stateSel", "value": 1 }, "value": 0.05 },
-    "x": { "field": "year", "type": "temporal", "title": "Year" },
-    "y": {
-      "field": "yoy_pct",
-      "type": "quantitative",
-      "title": "YoY Change",
-      "axis": { "format": "%" }
+
+  "layer": [
+
+    {
+      "params": [
+        { 
+          "name": "stateSel", 
+          "select": { "type": "point", "fields": ["state"] }, 
+          "bind": "legend" 
+        }
+      ],
+      "mark": { "type": "line", "point": true },
+      "encoding": {
+        "opacity": { "condition": { "param": "stateSel", "value": 1 }, "value": 0.1 },
+        "x": { "field": "year", "type": "temporal", "title": "Year" },
+        "y": {
+          "field": "yoy_pct",
+          "type": "quantitative",
+          "title": "YoY Change",
+          "axis": { "format": "%" }
+        },
+        "color": { "field": "state", "type": "nominal", "title": "State", "scale": {"scheme": "category20c"}},
+        "tooltip": [
+          { "field": "state", "type": "nominal" },
+          { "field": "year", "type": "temporal" },
+          { "field": "population", "type": "quantitative", "title": "Population" },
+          { "field": "yoy_pct", "type": "quantitative", "title": "YoY %", "format": ".1%" }
+        ]
+      }
     },
-    "color": { "field": "state", "type": "nominal", "title": "State", "scale": {"scheme": "category20c"}},
-    "tooltip": [
-      { "field": "state", "type": "nominal" },
-      { "field": "year", "type": "temporal" },
-      { "field": "population", "type": "quantitative", "title": "Population" },
-      { "field": "yoy_pct", "type": "quantitative", "title": "YoY %", "format": ".1%" }
-    ]
-  }
+
+    {
+      "data": { "values": [{ "annoYear": "2020-01-01" }] },
+      "mark": { "type": "rule", "strokeDash": [6,4], "strokeWidth": 2, "color": "gray" },
+      "encoding": {
+        "x": { "field": "annoYear", "type": "temporal" },
+        "opacity": { "value": 1 }
+      }
+    },
+
+    {
+      "data": { "values": [{ "annoYear": "2020-01-01", "label": "COVID-19 (2020)" }] },
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "bottom",
+        "dx": -100,
+        "dy": 470,
+        "fontSize": 12,
+        "fontWeight": "bold",
+        "fill": "gray",
+        "radius": 2,
+        "opacity": 0.95
+      },
+      "encoding": {
+        "x": { "field": "annoYear", "type": "temporal" },
+        "y": { "value": 5 },
+        "text": { "field": "label" }
+      }
+    }
+  ]
 }
