@@ -64,8 +64,8 @@
         },
         "color": { "field": "state", "type": "nominal", "title": "State", "scale": {"scheme": "category20c"}},
         "tooltip": [
-          { "field": "state", "type": "nominal" },
-          { "field": "year", "type": "temporal" },
+          { "field": "state", "type": "nominal", "title": "State"},
+          { "field": "year", "type": "temporal", "title": "Year" },
           { "field": "population", "type": "quantitative", "title": "Population" },
           { "field": "yoy_pct", "type": "quantitative", "title": "YoY %", "format": ".1%" }
         ]
